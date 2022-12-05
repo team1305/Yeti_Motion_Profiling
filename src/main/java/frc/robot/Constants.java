@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -39,15 +40,13 @@ public final class Constants {
 	public static final double kEncoderDistancePerPulse = (kWheelDiameterMeters * Math.PI) / (double) kEncoderCPR / kGearBoxReduction;
 	//public static final double kEncoderDistancePerPulse = 512;
 
-    public static final double ksVolts = 0.61758;
-    public static final double kvVoltSecondsPerMeter = 1.1824;
-    public static final double kaVoltSecondsSquaredPerMeter = 0.20101;
-
-
-    public static final double kPDriveVel = 1.6677;
+    public static final double ksVolts = 0.53111;
+    public static final double kvVoltSecondsPerMeter = 2.4475;
+    public static final double kaVoltSecondsSquaredPerMeter = 0.21498;
+    public static final double kPDriveVel = 2.9309;
 	
 
-	public static final double kTrackwidthMeters = 0.453;//CHANGE THIS TO BE ACTUAL WIDTH
+	public static final double kTrackwidthMeters = Units.inchesToMeters(20);//CHANGE THIS TO BE ACTUAL WIDTH
     public static final DifferentialDriveKinematics kDriveKinematics =
         new DifferentialDriveKinematics(kTrackwidthMeters);
 

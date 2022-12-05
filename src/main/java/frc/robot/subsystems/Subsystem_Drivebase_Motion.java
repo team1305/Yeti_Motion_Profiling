@@ -46,7 +46,7 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftMotors, m_rightMotors);
 
   // The gyro sensor
-  private final Gyro m_gyro = new AHRS(SPI.Port.kMXP);
+  public final Gyro m_gyro = new AHRS(SPI.Port.kMXP);
  
 
 
@@ -112,7 +112,7 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   private double nativeUnitsToDistanceMeters(double sensorCounts){
     double kCountsPerRev = 2048;
     double kGearRatio = (50/14)*(48/16);//10.71428571428571;
-    double kWheelRadiusInches = 6/2;
+    double kWheelRadiusInches = 5.9/2;
 		double motorRotations = (double)sensorCounts / kCountsPerRev;
 		double wheelRotations = motorRotations / kGearRatio;
 		double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(kWheelRadiusInches));
@@ -129,7 +129,8 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   }
 
   public double getRightEncoderDistance() {
-    return nativeUnitsToDistanceMeters(mtRight1.getSelectedSensorPosition());
+    return -nativeUnitsToDistanceMeters(mtRight1.getSelectedSensorPosition());
+    // negative sign was added
   }
 
   public double getLeftEncoderSpeed() {
@@ -137,7 +138,8 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   }
 
   public double getRightEncoderSpeed() {
-    return nativeUnitsToVelocityMetersPerSecond(mtRight1.getSelectedSensorVelocity());
+    return -nativeUnitsToVelocityMetersPerSecond(mtRight1.getSelectedSensorVelocity());
+    // negative sign was added
   }
 
   /**
