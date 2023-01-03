@@ -84,6 +84,7 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
     //if (bteleop = false) {
        m_odometry.update(
         m_gyro.getRotation2d(), getLeftEncoderDistance(), getRightEncoderDistance());
+        SmartDashboard.putNumber("Ratio", getGearRatio());
        SmartDashboard.putNumber("Right Encoder (Ticks)", mtRight1.getSelectedSensorPosition());
        SmartDashboard.putNumber("Left Encoder (Ticks)", mtLeft1.getSelectedSensorPosition());
        SmartDashboard.putNumber("Right Encoder Distance (Meteres)", getRightEncoderDistance());
@@ -109,13 +110,18 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   }
   */
 
+  private double getGearRatio() {
+    return (50.0/14.0)*(48.0/16.0);
+  }
+
   private double nativeUnitsToDistanceMeters(double sensorCounts){
-    double kCountsPerRev = 2048;
-    double kGearRatio = (50/14)*(48/16);//10.71428571428571;
-    double kWheelRadiusInches = 5.9/2;
-		double motorRotations = (double)sensorCounts / kCountsPerRev;
-		double wheelRotations = motorRotations / kGearRatio;
-		double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(kWheelRadiusInches));
+    double kCountsPerRev = 2048.0;
+    double kWheelDiameterInches = 6.0;
+		double motorRotations = sensorCounts / kCountsPerRev;
+    SmartDashboard.putNumber("Motor Rotations", motorRotations);
+		double wheelRotations = motorRotations / getGearRatio();
+    SmartDashboard.putNumber("Wheel Rotations", wheelRotations);
+		double positionMeters = wheelRotations * (Math.PI * Units.inchesToMeters(kWheelDiameterInches));
 		return positionMeters;
 	}
 
