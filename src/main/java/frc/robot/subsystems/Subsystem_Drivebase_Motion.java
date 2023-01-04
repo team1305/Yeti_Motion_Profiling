@@ -92,6 +92,7 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
        SmartDashboard.putNumber("Right Encoder Speed", getRightEncoderSpeed());
        SmartDashboard.putNumber("Left Encoder Speed", getLeftEncoderSpeed());
        SmartDashboard.putNumber("GYRO", m_gyro.getAngle());
+       SmartDashboard.putNumber("AVERAGE DISTANCE", getAverageEncoderDistance());
     //} 
   }
 
@@ -111,22 +112,24 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   */
 
   private double getGearRatio() {
-    return (50.0/14.0)*(48.0/16.0);
+    //return (50.0/14.0)*(48.0/16.0);
+    return (50.0/14.0)*(50.0/14.0);
   }
 
-  private double nativeUnitsToDistanceMeters(double sensorCounts){
+  public double nativeUnitsToDistanceMeters(double sensorCounts){
     double kCountsPerRev = 2048.0;
     double kWheelDiameterInches = 6.0;
 		double motorRotations = sensorCounts / kCountsPerRev;
-    SmartDashboard.putNumber("Motor Rotations", motorRotations);
 		double wheelRotations = motorRotations / getGearRatio();
-    SmartDashboard.putNumber("Wheel Rotations", wheelRotations);
 		double positionMeters = wheelRotations * (Math.PI * Units.inchesToMeters(kWheelDiameterInches));
+    SmartDashboard.putNumber("Motor Rotations", motorRotations);
+    SmartDashboard.putNumber("Wheel Rotations", wheelRotations);
+    SmartDashboard.putNumber("positionMeters", positionMeters);
 		return positionMeters;
 	}
 
-  private double nativeUnitsToVelocityMetersPerSecond(double sensorCountsPer100ms){
-    double k100msPerSecond = 10;
+  public double nativeUnitsToVelocityMetersPerSecond(double sensorCountsPer100ms){
+    double k100msPerSecond = 10.0;
     double velocityMetersPerSecond = nativeUnitsToDistanceMeters(sensorCountsPer100ms) * k100msPerSecond;
 		return velocityMetersPerSecond;
 	}
