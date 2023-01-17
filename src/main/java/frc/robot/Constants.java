@@ -4,11 +4,17 @@
 
 package frc.robot;
 
+import java.nio.file.Path;
+
 import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -28,6 +34,13 @@ public final class Constants {
 	public static WPI_TalonFX mtDriveLeft2 = new WPI_TalonFX(14);
     public final static StatorCurrentLimitConfiguration currentLimitConfig = new StatorCurrentLimitConfiguration(true, 40, 39.95, 1);
 	public final static StatorCurrentLimitConfiguration currentLimitConfig30 = new StatorCurrentLimitConfiguration(true, 30, 29.95, 1);
+
+		//motor ID for intake
+		public static WPI_TalonFX mtIntake = new WPI_TalonFX(15); //set the motor to the right ID
+		//solenoids for Intake   
+		public static Solenoid slndIntake =  new Solenoid(PneumaticsModuleType.CTREPCM, 6); //6 set the solenoid to right ID, and add the moduler type
+
+		public static Compressor cmpRobotCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
 	//public static final int[] kLeftEncoderPorts = new int[] {13, 14};
 	//public static final int[] kRightEncoderPorts = new int[] {11, 12};
@@ -59,7 +72,10 @@ public final class Constants {
 		public static final double kRamseteB = 2;
 		public static final double kRamseteZeta = 0.7;
 
-
-
-
+	public static final Path PATH_StraightPath = Filesystem.getDeployDirectory().toPath().resolve(
+	"paths/StraightPath.wpilib.json");
+	public static final Path PATH_TestPath = Filesystem.getDeployDirectory().toPath()
+	.resolve("paths/IntakeTest.wpilib.json");
+	public static final Path PATH_CurvePath = Filesystem.getDeployDirectory().toPath()
+	.resolve("paths/CurvePath.wpilib.json");
 }

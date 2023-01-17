@@ -8,21 +8,29 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.util.Units;
 //import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 //import edu.wpi.first.wpilibj.examples.ramsetecommand.Constants;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 //import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-//import frc.robot.RobotContainer;
+import frc.robot.commands.Auto.StraightPath;
 
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -51,7 +59,11 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
 
 
   // Odometry class for tracking robot pose
-  private final DifferentialDriveOdometry m_odometry;
+  private static DifferentialDriveOdometry m_odometry;
+
+  Trajectory TRAJ_StraightPath;
+  Trajectory TRAJ_IntakeTest;
+  Trajectory TRAJ_CurvePath;
 
   /** Creates a new DriveSubsystem. */
   public Subsystem_Drivebase_Motion() {
@@ -76,6 +88,8 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
 
     resetEncoders();
     m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
+
+    loadTrajectories();
   }
 
   @Override
@@ -96,20 +110,6 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
     //} 
   }
 
-  /*
-  public static double getEncRightSide() {
-    return mtRight1.getSelectedSensorPosition();
-  }
-
-   public void set_teleop(boolean bmode) {
-     bteleop = bmode;
-   }
-   
-
-  public static double getEncLeftSide() {
-    return mtLeft1.getSelectedSensorPosition();
-  }
-  */
 
   private double getGearRatio() {
     //return (50.0/14.0)*(48.0/16.0);
@@ -174,7 +174,7 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
    *
    * @param pose The pose to which to set the odometry.
    */
-  public void resetOdometry(Pose2d pose) {
+  public void resetOdeometry(Pose2d pose) {
     resetEncoders();
     m_odometry.resetPosition(pose, m_gyro.getRotation2d());
   }
@@ -247,4 +247,69 @@ public class Subsystem_Drivebase_Motion extends SubsystemBase {
   public double getTurnRate() {
     return -m_gyro.getRate();
   }
+
+  public void loadTrajectories() {
+    try {
+      TRAJ_StraightPath = TrajectoryUtil.fromPathweaverJson(Constants.PATH_StraightPath);
+      TRAJ_IntakeTest = TrajectoryUtil.fromPathweaverJson(Constants.PATH_TestPath);
+      TRAJ_CurvePath = TrajectoryUtil.fromPathweaverJson(Constants.PATH_TestPath);
+      //StraightPath = TrajectoryUtil.fromPathweaverJson("C:\\Users\\1305\\Desktop\\Robot Code repository\\Yeti_motion_profiling\\src\\main\\deploy\\deploy\\pathplanner\\generatedJSON\\StraightPath.wpilib.json");
+
+    } catch (Exception exception) {
+      DriverStation.reportError("Unable to open trajectory: ", exception.getStackTrace());
+      System.out.println("Unable to read trajectory" + Constants.PATH_StraightPath);
+
+    }
+  }
+
+  public enum AutoPath {
+    StraightPath,
+    IntakeTest,
+    CurvePath
+  }
+
+  public Trajectory getTrajectory(AutoPath trajectory) {
+    switch (trajectory) {
+
+      case StraightPath:
+        return TRAJ_StraightPath;
+      case IntakeTest:
+        return TRAJ_IntakeTest;
+        case CurvePath:
+          return TRAJ_CurvePath;
+
+      default:
+        System.out.println("RETURN NULL");
+        return null;
+        
+    }
+  }
+
+  public RamseteCommand getRamseteCommand(Trajectory trajectory) {
+
+    return new RamseteCommand(
+      /*
+      trajectory,
+      this::getPose,
+      new RamseteController(),
+      Constants.kDriveKinematics,
+      this::tankDriveVolts,
+      this);
+  */
+      trajectory,
+      this::getPose,
+      new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
+      new SimpleMotorFeedforward(
+          Constants.ksVolts,
+          Constants.kvVoltSecondsPerMeter,
+          Constants.kaVoltSecondsSquaredPerMeter),
+      Constants.kDriveKinematics,
+      this::getWheelSpeeds,
+      new PIDController(Constants.kPDriveVel, 0, 0),
+      new PIDController(Constants.kPDriveVel, 0, 0),
+      // RamseteCommand passes volts to the callback
+      this::tankDriveVolts,
+      this);
+  }
+
 }
